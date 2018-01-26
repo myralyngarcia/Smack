@@ -1,5 +1,6 @@
 package com.example.myralyn.smack
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.design.widget.NavigationView
@@ -34,8 +35,9 @@ class MainActivity : AppCompatActivity(){
             super.onBackPressed()
         }
     }
-    fun loginBtnNavHeader(view: View){
-
+    fun loginBtnNavClicked(view: View){
+        val loginIntent = Intent(this, LoginActivity::class.java)
+        startActivity(loginIntent)
     }
     fun addChannelClicked (view: View){
 
