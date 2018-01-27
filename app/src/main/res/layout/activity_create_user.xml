@@ -79,15 +79,15 @@
         app:srcCompat="@drawable/profiledefault" />
 
     <Button
-        android:id="@+id/generateBackgroundColorBtn"
+        android:id="@+id/generateAvatarBackgroundColorBtn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="32dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="16dp"
         android:background="@color/colorPrimary"
-        android:onClick="generateBackgroundColorClicked"
-        android:text="Generate Background Color"
+        android:onClick="generateAvatarBackgroundColorClicked"
+        android:text="generate background color"
         android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
