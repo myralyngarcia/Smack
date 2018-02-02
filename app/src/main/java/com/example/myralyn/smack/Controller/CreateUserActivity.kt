@@ -1,10 +1,11 @@
-package com.example.myralyn.smack
+package com.example.myralyn.smack.Controller
 
 import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import com.example.myralyn.smack.R.id.createAvatarImageView
+import com.example.myralyn.smack.R
+import com.example.myralyn.smack.Services.AuthService
 import kotlinx.android.synthetic.main.activity_create_user.*
 import java.util.*
 
@@ -32,6 +33,12 @@ class CreateUserActivity : AppCompatActivity() {
         createAvatarImageView.setImageResource(resourceId)
     }
     fun createUserClicked(view: View){
+        AuthService.registerUser(this, "myra3@gmail.com", "12345") {complete ->
+            if (complete){
+                println("user Registration successful")
+            }
+            else{println("failed to register user") }
+        }
 
     }
     fun generateAvatarBackgroundColorClicked(view: View){
