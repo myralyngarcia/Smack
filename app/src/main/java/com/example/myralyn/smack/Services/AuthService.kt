@@ -4,9 +4,12 @@ import android.content.Context
 import android.util.Log
 import com.android.volley.Request
 import com.android.volley.Response
+import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.example.myralyn.smack.Utilities.URL_LOGIN
 import com.example.myralyn.smack.Utilities.URL_REGISTER
+import org.json.JSONException
 import org.json.JSONObject
 
 
@@ -17,6 +20,10 @@ import org.json.JSONObject
  */
 object AuthService {
 
+    var isLoggedIn = false
+    var userEmail = ""
+    var authToken = ""
+
     //we need to pass context coz Volley requires it. also we need completion handler that returns boolean
     fun registerUser(context: Context, email: String, password: String, complete: (Boolean)-> Unit){
         val url = URL_REGISTER
@@ -26,7 +33,7 @@ object AuthService {
         //convert request body to string so we can convert to byteArray for Volley
         val requestBody = jsonBody.toString()
 
-        //now create the registerRequest object
+        //use StringRequest coz we are expecting a String for response
         val registerRequest = object : StringRequest(Request.Method.POST, url, Response.Listener { response ->
             println(response)
             complete(true)
@@ -43,9 +50,45 @@ object AuthService {
             override fun getBody(): ByteArray {
                 return requestBody.toByteArray()
             }
-//
         }
         //put reqister request in the queue in this context
         Volley.newRequestQueue(context).add(registerRequest)
     }
+
+    fun loginUser (context: Context, email: String, password: String, complete: (Boolean) -> Unit){
+        val url = URL_LOGIN
+        val jsonBody = JSONObject()
+        jsonBody.put("email", email)
+        jsonBody.put("password", password)
+        val stringBody = jsonBody.toString()
+        //use JsonObjectRequest coz we are expecting json response
+        val loginRequest = object: JsonObjectRequest(Request.Method.POST, url, null, Response.Listener { response ->
+
+            try {//getString returns a jsonObject exception so we need to do try/catch
+                //parse json response
+                authToken = response.getString("token")
+                userEmail = response.getString("user")
+                isLoggedIn = true
+                complete(true)
+            }catch (e: JSONException){
+                Log.d("JSON", "EXEC: " + e.localizedMessage)
+                complete(false)
+            }
+        }, Response.ErrorListener {error ->
+            Log.d("ERROR", "login failed $error")
+            complete(false)
+        }){
+            override fun getBodyContentType(): String {
+                return "application/json; charset=utf-8"
+
+            }
+
+            override fun getBody(): ByteArray {
+                return stringBody.toByteArray()
+            }
+
+        }
+        Volley.newRequestQueue(context).add(loginRequest)
+    }
+
 }

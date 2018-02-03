@@ -15,10 +15,12 @@ class LoginActivity : AppCompatActivity() {
 
     fun loginLoginBtnClicked (view: View){
 
+
     }
     fun loginCreateUserBtnClicked (view: View){
         val createUserIntent = Intent(this, CreateUserActivity::class.java)
         startActivity(createUserIntent)
 
     }
+
 }

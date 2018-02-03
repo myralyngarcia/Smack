@@ -33,9 +33,18 @@ class CreateUserActivity : AppCompatActivity() {
         createAvatarImageView.setImageResource(resourceId)
     }
     fun createUserClicked(view: View){
-        AuthService.registerUser(this, "myra3@gmail.com", "12345") {complete ->
-            if (complete){
+        val email = createEmailText.text.toString()
+        val password = createPasswordText.text.toString()
+        AuthService.registerUser(this, email, password) {registerSuccess ->
+            if (registerSuccess){
                 println("user Registration successful")
+                AuthService.loginUser(this, email, password) {loginSuccess ->
+                    if(loginSuccess){
+                        println(AuthService.authToken)
+                        println(AuthService.userEmail)
+                    }
+                }
+
             }
             else{println("failed to register user") }
         }
@@ -54,4 +63,5 @@ class CreateUserActivity : AppCompatActivity() {
         avatarColor="[savedR, savedG, savedG, 1]"
 
     }
+
 }
