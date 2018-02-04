@@ -4,8 +4,10 @@ import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import com.example.myralyn.smack.R
 import com.example.myralyn.smack.Services.AuthService
+import com.example.myralyn.smack.Services.UserDataService
 import kotlinx.android.synthetic.main.activity_create_user.*
 import java.util.*
 
@@ -32,24 +34,7 @@ class CreateUserActivity : AppCompatActivity() {
         val resourceId = resources.getIdentifier(userAvatar,"drawable", packageName)
         createAvatarImageView.setImageResource(resourceId)
     }
-    fun createUserClicked(view: View){
-        val email = createEmailText.text.toString()
-        val password = createPasswordText.text.toString()
-        AuthService.registerUser(this, email, password) {registerSuccess ->
-            if (registerSuccess){
-                println("user Registration successful")
-                AuthService.loginUser(this, email, password) {loginSuccess ->
-                    if(loginSuccess){
-                        println(AuthService.authToken)
-                        println(AuthService.userEmail)
-                    }
-                }
 
-            }
-            else{println("failed to register user") }
-        }
-
-    }
     fun generateAvatarBackgroundColorClicked(view: View){
         var random = Random()
         var r = random.nextInt(255)
@@ -59,9 +44,26 @@ class CreateUserActivity : AppCompatActivity() {
         var savedR = r.toDouble()/255
         var savedG = g.toDouble()/255
         var savedB = b.toDouble()/255
-
         avatarColor="[savedR, savedG, savedG, 1]"
-
     }
+
+    fun createUserClicked(view: View){
+        val username = createUserNameText.text.toString()
+        val email = createEmailText.text.toString()
+        val password = createPasswordText.text.toString()
+
+            AuthService.registerUser(this, email, password) { registerSuccess ->
+                if (registerSuccess) {
+                    AuthService.loginUser(this, email, password) { loginSuccess ->
+                        if (loginSuccess) {
+                            AuthService.createUser(this, username, email, userAvatar, avatarColor){createUserSuccess ->
+                                if(createUserSuccess){
+                                    println("created user successfully with $username, $email, $userAvatar, $avatarColor")
+                                    //dismiss activity since we are done with this activity
+                                    finish() } } } }
+                }
+            }
+    }
+
 
 }
