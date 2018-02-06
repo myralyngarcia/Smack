@@ -19,6 +19,7 @@ class CreateUserActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_user)
+        createSpinner.visibility = View.INVISIBLE
     }
 
     fun generateUserAvatar(view: View) {
@@ -48,6 +49,7 @@ class CreateUserActivity : AppCompatActivity() {
     }
 
     fun createUserClicked(view: View){
+        spinnerEnable(true)
         val username = createUserNameText.text.toString()
         val email = createEmailText.text.toString()
         val password = createPasswordText.text.toString()
@@ -58,12 +60,37 @@ class CreateUserActivity : AppCompatActivity() {
                         if (loginSuccess) {
                             AuthService.createUser(this, username, email, userAvatar, avatarColor){createUserSuccess ->
                                 if(createUserSuccess){
-                                    println("created user successfully with $username, $email, $userAvatar, $avatarColor")
+                                    spinnerEnable(false)
                                     //dismiss activity since we are done with this activity
-                                    finish() } } } }
-                }
+                                    finish()
+                                }else{errorToast()}
+                            }
+                        }else{errorToast()}
+                    }
+                }else {errorToast()}
             }
     }
 
+    fun errorToast(){
+        Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG).show()
+        spinnerEnable(false)
+    }
+
+    fun spinnerEnable (enable: Boolean){
+        if (enable){
+            createSpinner.visibility = View.VISIBLE
+            createUserBtn.isEnabled = false
+            createAvatarImageView.isEnabled = false
+            generateAvatarBackgroundColorBtn.isEnabled = false
+        }else{
+            createSpinner.visibility = View.INVISIBLE
+            createUserBtn.isEnabled = true
+            createAvatarImageView.isEnabled = true
+            generateAvatarBackgroundColorBtn.isEnabled = true
+        }
+
+
+
+    }
 
 }
