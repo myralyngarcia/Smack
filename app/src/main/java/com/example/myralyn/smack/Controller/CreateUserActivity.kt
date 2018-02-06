@@ -1,13 +1,16 @@
 package com.example.myralyn.smack.Controller
 
+import android.content.Intent
 import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v4.content.LocalBroadcastManager
 import android.view.View
 import android.widget.Toast
 import com.example.myralyn.smack.R
 import com.example.myralyn.smack.Services.AuthService
 import com.example.myralyn.smack.Services.UserDataService
+import com.example.myralyn.smack.Utilities.BROADCAST_DATA_CHANGED
 import kotlinx.android.synthetic.main.activity_create_user.*
 import java.util.*
 
@@ -61,6 +64,9 @@ class CreateUserActivity : AppCompatActivity() {
                         if (loginSuccess) {
                             AuthService.createUser(this, username, email, userAvatar, avatarColor){createUserSuccess ->
                                 if(createUserSuccess){
+
+                                    val userDataChange = Intent(BROADCAST_DATA_CHANGED)
+                                    LocalBroadcastManager.getInstance(this).sendBroadcast(userDataChange)
                                     spinnerEnable(false)
                                     //dismiss activity since we are done with this activity
                                     finish()
