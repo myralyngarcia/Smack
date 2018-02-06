@@ -54,6 +54,7 @@ class CreateUserActivity : AppCompatActivity() {
         val email = createEmailText.text.toString()
         val password = createPasswordText.text.toString()
 
+        if(username.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty()){
             AuthService.registerUser(this, email, password) { registerSuccess ->
                 if (registerSuccess) {
                     AuthService.loginUser(this, email, password) { loginSuccess ->
@@ -69,6 +70,12 @@ class CreateUserActivity : AppCompatActivity() {
                     }
                 }else {errorToast()}
             }
+        }else{
+            Toast.makeText(this, "make sure username, password, email are filled in", Toast.LENGTH_LONG).show()
+            spinnerEnable(false)
+        }
+
+
     }
 
     fun errorToast(){
