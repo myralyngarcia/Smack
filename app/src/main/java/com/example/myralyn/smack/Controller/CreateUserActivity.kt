@@ -9,8 +9,8 @@ import android.view.View
 import android.widget.Toast
 import com.example.myralyn.smack.R
 import com.example.myralyn.smack.Services.AuthService
-import com.example.myralyn.smack.Services.UserDataService
-import com.example.myralyn.smack.Utilities.BROADCAST_DATA_CHANGED
+import com.example.myralyn.smack.Utilities.BROADCAST_USER_DATA_CHANGED
+
 import kotlinx.android.synthetic.main.activity_create_user.*
 import java.util.*
 
@@ -23,6 +23,7 @@ class CreateUserActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_user)
         createSpinner.visibility = View.INVISIBLE
+
     }
 
     fun generateUserAvatar(view: View) {
@@ -48,7 +49,7 @@ class CreateUserActivity : AppCompatActivity() {
         var savedR = r.toDouble()/255
         var savedG = g.toDouble()/255
         var savedB = b.toDouble()/255
-        avatarColor="[savedR, savedG, savedG, 1]"
+        avatarColor="[$savedR, $savedG, $savedG, 1]"
     }
 
     fun createUserClicked(view: View){
@@ -64,26 +65,27 @@ class CreateUserActivity : AppCompatActivity() {
                         if (loginSuccess) {
                             AuthService.createUser(this, username, email, userAvatar, avatarColor){createUserSuccess ->
                                 if(createUserSuccess){
-
-                                    val userDataChange = Intent(BROADCAST_DATA_CHANGED)
+                                    val userDataChange = Intent(BROADCAST_USER_DATA_CHANGED)
                                     LocalBroadcastManager.getInstance(this).sendBroadcast(userDataChange)
                                     spinnerEnable(false)
-                                    //dismiss activity since we are done with this activity
                                     finish()
-                                }else{errorToast()}
+                                }else{
+                                    errorToast()
+                                }
                             }
-                        }else{errorToast()}
+                        }else{
+                            errorToast()
+                        }
                     }
-                }else {errorToast()}
+                }else {
+                    errorToast()
+                }
             }
         }else{
             Toast.makeText(this, "make sure username, password, email are filled in", Toast.LENGTH_LONG).show()
             spinnerEnable(false)
         }
-
-
     }
-
     fun errorToast(){
         Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG).show()
         spinnerEnable(false)
@@ -92,18 +94,14 @@ class CreateUserActivity : AppCompatActivity() {
     fun spinnerEnable (enable: Boolean){
         if (enable){
             createSpinner.visibility = View.VISIBLE
-            createUserBtn.isEnabled = false
-            createAvatarImageView.isEnabled = false
-            generateAvatarBackgroundColorBtn.isEnabled = false
         }else{
             createSpinner.visibility = View.INVISIBLE
-            createUserBtn.isEnabled = true
-            createAvatarImageView.isEnabled = true
-            generateAvatarBackgroundColorBtn.isEnabled = true
         }
-
-
-
+        createUserBtn.isEnabled = !enable
+        createAvatarImageView.isEnabled = !enable
+        generateAvatarBackgroundColorBtn.isEnabled = !enable
     }
+
+
 
 }

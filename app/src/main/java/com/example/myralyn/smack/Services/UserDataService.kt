@@ -15,26 +15,41 @@ object UserDataService {
     var email = ""
     var name = ""
 
+    fun logout(){
+        id = ""
+        avatarName =""
+        avatarColor =""
+        email = ""
+        name = ""
+        AuthService.authToken=""
+        AuthService.userEmail=""
+        AuthService.isLoggedIn=false
+    }
+
     //the component is the RGB and we return Int coz in android colors are actually integers
     fun returnAvatarColor (components: String): Int{
         //this is the string array that we got for the user avatarColor in the database
-        //[0.13333333333333333, 0.756862274450980392, 0.7215686274509804, 1]
-        val stripColor = components
+        //[0.5254901960784314, 0.6235294117647059, 0.6235294117647059, 1]
+        println("component: $components")
+        val strippedColor = components
                 .replace("[", "")
                 .replace("]", "")
                 .replace(",", "")
-        //scanner will start at beginning of string and pick up the first double value, next double value, next double value
+        //scanner will start at beginning of string and pick up the first double value, next double value
         var r = 0
         var g = 0
         var b = 0
-        //stripColor is: 0.13333333333333333 0.756862274450980392 0.7215686274509804
-        var scanner = Scanner(stripColor)
+        //strippedColor is: 0.5254901960784314 0.6235294117647059 0.6235294117647059 1
+
+       var scanner = Scanner(strippedColor)
+//        scanner.useLocale(Locale.CANADA)
+//        println("locale is: ${scanner.locale()}")
         if (scanner.hasNext()){
             r = (scanner.nextDouble() * 255).toInt()
             g = (scanner.nextDouble() * 255).toInt()
             b = (scanner.nextDouble() * 255).toInt()
 
         }
-        return Color.rgb(r, g, b)//returns an integer for the rgb
+        return Color.rgb(r,g,b)//returns an integer for the rgb
     }
 }

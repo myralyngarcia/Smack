@@ -31,8 +31,7 @@
         android:text="myralyng"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         app:layout_constraintStart_toEndOf="@+id/userimageNavHeader"
-        app:layout_constraintTop_toTopOf="@+id/userimageNavHeader"
-        tools:text="myralyng" />
+        app:layout_constraintTop_toTopOf="@+id/userimageNavHeader" />
 
     <TextView
         android:id="@+id/userEmailNavHeader"
@@ -41,8 +40,7 @@
         android:layout_marginStart="8dp"
         android:text="myralyngarcia@gmail.com"
         app:layout_constraintStart_toEndOf="@+id/userimageNavHeader"
-        app:layout_constraintTop_toBottomOf="@+id/usernameNavHeader"
-        tools:text="myralyngarcia@gmail.com" />
+        app:layout_constraintTop_toBottomOf="@+id/usernameNavHeader" />
 
     <Button
         android:id="@+id/loginBtnNavHeader"
