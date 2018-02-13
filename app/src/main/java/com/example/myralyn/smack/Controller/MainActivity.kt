@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity(){
         if(AuthService.isLoggedIn){
             //we want to logout and clear out the UserData variable and AuthService
             UserDataService.logout()
-            usernameNavHeader.text = "Login"
+            usernameNavHeader.text = ""
             userEmailNavHeader.text = ""
             userimageNavHeader.setImageResource(R.drawable.profiledefault)
             userimageNavHeader.setBackgroundColor(Color.TRANSPARENT)

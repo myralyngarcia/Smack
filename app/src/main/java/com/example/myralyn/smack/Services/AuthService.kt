@@ -1,6 +1,8 @@
 package com.example.myralyn.smack.Services
 
 import android.content.Context
+import android.content.Intent
+import android.support.v4.content.LocalBroadcastManager
 import android.util.Log
 import com.android.volley.Request
 import com.android.volley.Response
@@ -8,9 +10,7 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.example.myralyn.smack.Services.UserDataService.id
-import com.example.myralyn.smack.Utilities.URL_CREATE_USER
-import com.example.myralyn.smack.Utilities.URL_LOGIN
-import com.example.myralyn.smack.Utilities.URL_REGISTER
+import com.example.myralyn.smack.Utilities.*
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -135,6 +135,42 @@ object AuthService {
             }
         }
         Volley.newRequestQueue(context).add(createRequest)
+    }
+
+    //for this we only need context coz its a get request we are not passing any body
+    //and everything we need to send is part of the url
+
+    fun findUserByEmail(context: Context, complete: (Boolean) -> Unit){
+        var findUserRequest = object: JsonObjectRequest(Request.Method.GET, "$URL_GET_USER$userEmail", null,
+                Response.Listener{response ->
+                    try{
+                        UserDataService.id = response.getString("_id")
+                        UserDataService.avatarColor = response.getString("avatarColor")
+                        UserDataService.avatarName = response.getString("avatarName")
+                        UserDataService.email = response.getString("email")
+                        UserDataService.name = response.getString("name")
+
+                        val userDataChange = Intent(BROADCAST_USER_DATA_CHANGED)
+                        LocalBroadcastManager.getInstance(context).sendBroadcast(userDataChange)
+                        complete(true)
+                    }catch (e: JSONException){
+                        Log.d("JSON", "EXEC:"+ e.localizedMessage)
+                        complete(false)
+                    }
+
+
+                },
+                Response.ErrorListener { error ->
+                Log.d("ERROR", "failed to get user by email")
+                complete(false)}
+        ){
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers.put("Authorization","Bearer $authToken")
+                return headers
+            }
+        }
+        Volley.newRequestQueue(context).add(findUserRequest)
     }
 
 }
