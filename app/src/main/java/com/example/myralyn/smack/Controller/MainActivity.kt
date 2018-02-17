@@ -8,22 +8,22 @@ import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
-import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
-import android.widget.TextView
 import com.example.myralyn.smack.R
 import com.example.myralyn.smack.Services.AuthService
 import com.example.myralyn.smack.Services.UserDataService
 import com.example.myralyn.smack.Utilities.BROADCAST_USER_DATA_CHANGED
+import com.example.myralyn.smack.Utilities.SOCKET_URL
+import io.socket.client.IO
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.add_channel_dialog.view.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.nav_header_main.*
-import java.util.zip.Inflater
 
 class MainActivity : AppCompatActivity(){
+    val socket = IO.socket(SOCKET_URL)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,13 +34,24 @@ class MainActivity : AppCompatActivity(){
                 this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
-        //hide the keybaord immediately when the activity starts. we do not want the keyboard popping up right away
-        hideKeyboard()
+    }
 
+    override fun onResume() {
         //registerReceiver needs a receiver and IntentFilter so that it will not receive all intent
-        LocalBroadcastManager.getInstance(this).registerReceiver(userDataChangeReceiver, IntentFilter(BROADCAST_USER_DATA_CHANGED))
-        println("finished executing receiver")
+        LocalBroadcastManager.getInstance(this).registerReceiver(userDataChangeReceiver,
+                IntentFilter(BROADCAST_USER_DATA_CHANGED))
+        socket.connect()
+        super.onResume()
+    }
 
+    override fun onPause() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(userDataChangeReceiver)
+        super.onPause()
+    }
+
+    override fun onDestroy() {
+        socket.disconnect()
+        super.onDestroy()
     }
     //create a broadcastreceiver object to be passed as receiver to the broadcastManager
     private val userDataChangeReceiver = object: BroadcastReceiver(){
@@ -77,8 +88,8 @@ class MainActivity : AppCompatActivity(){
 
         }else{
             //we want to login coz here we are logged-in
-        val loginIntent = Intent(this, LoginActivity::class.java)
-        startActivity(loginIntent)
+            val loginIntent = Intent(this, LoginActivity::class.java)
+            startActivity(loginIntent)
         }
     }
     fun addChannelClicked (view: View){
@@ -89,32 +100,29 @@ class MainActivity : AppCompatActivity(){
             //create dialog view from custom layout
             val dialogView = layoutInflater.inflate(R.layout.add_channel_dialog, null)
             builder.setView(dialogView)
-                    .setPositiveButton("Add"){DialogInterface, i ->
+                    .setPositiveButton("Add"){dialogInterface, i ->
                         //perform some logic when clicked.
                         // Get reference to the UI elements in Dialog views
-                        val channelNameTxt = dialogView.findViewById<EditText>(R.id.addChannelNameTxt)
-                        val channelDescTxt = dialogView.findViewById<EditText>(R.id.addChannelDescTxt)
+                        val nameTextField = dialogView.findViewById<EditText>(R.id.addChannelNameTxt)
+                        val descTextField = dialogView.findViewById<EditText>(R.id.addChannelDescTxt)
+
                         //now we can get the text via reference
-                        val channelName = channelNameTxt.text.toString()
-                        val channelDesc = channelDescTxt.text.toString()
+                        val channelName = nameTextField.text.toString()
+                        val channelDesc = descTextField.text.toString()
 
                         // create channel with name and description,
-                        // but first we need to hide the keyboard when we get the channel description
-                        //copy the hide keyboard from loginActivity then hide keyboard if we create channel
-                        hideKeyboard()
-
+                        socket.emit("newChannel", channelName, channelDesc)
 
                     }
-                    .setNegativeButton ("Cancel"){DialogInterface, i ->
-                        //cancel and close the dialog, also hide keyboard when we cancel
-                        hideKeyboard()
+                    .setNegativeButton ("Cancel"){dialogInterface, i ->
+                        //cancel and close the dialog
                     }.show()
         }
 
     }
 
     fun sendMsgBtnClicked (view: View){
-
+        hideKeyboard()
     }
 
     fun hideKeyboard (){
