@@ -11,12 +11,15 @@ import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import com.example.myralyn.smack.Model.Channel
 import com.example.myralyn.smack.R
 import com.example.myralyn.smack.Services.AuthService
+import com.example.myralyn.smack.Services.MessageService
 import com.example.myralyn.smack.Services.UserDataService
 import com.example.myralyn.smack.Utilities.BROADCAST_USER_DATA_CHANGED
 import com.example.myralyn.smack.Utilities.SOCKET_URL
 import io.socket.client.IO
+import io.socket.emitter.Emitter
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.add_channel_dialog.view.*
 import kotlinx.android.synthetic.main.app_bar_main.*
@@ -30,6 +33,11 @@ class MainActivity : AppCompatActivity(){
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
+        //we moved from onResume coz these 2 line of code is printed 2x
+        //we only want to be called once so we put it here in onCreate
+        socket.connect()
+        socket.on("channelCreated", onNewChannel)//we listen of event, ChannelCreated and use onNewChannel to extract the info
+
         val toggle = ActionBarDrawerToggle(
                 this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
         drawer_layout.addDrawerListener(toggle)
@@ -40,17 +48,12 @@ class MainActivity : AppCompatActivity(){
         //registerReceiver needs a receiver and IntentFilter so that it will not receive all intent
         LocalBroadcastManager.getInstance(this).registerReceiver(userDataChangeReceiver,
                 IntentFilter(BROADCAST_USER_DATA_CHANGED))
-        socket.connect()
         super.onResume()
-    }
-
-    override fun onPause() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(userDataChangeReceiver)
-        super.onPause()
     }
 
     override fun onDestroy() {
         socket.disconnect()
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(userDataChangeReceiver)
         super.onDestroy()
     }
     //create a broadcastreceiver object to be passed as receiver to the broadcastManager
@@ -119,6 +122,28 @@ class MainActivity : AppCompatActivity(){
                     }.show()
         }
 
+    }
+
+    //this emitter listener will run in worker thread not on main thread to avoid
+    //the MainActivity hanging
+    // on arg we are on worker or background thread
+    //but on runOnUiThread we are back in the ui thread
+    private val onNewChannel = Emitter.Listener { args ->
+        runOnUiThread {
+                //here we can update the list view, add stuff to the channel
+            //lets extract the information that is comming from the emitter from the args
+            //this info is based on the ui code when we look at atom
+            val channelName = args[0] as String
+            val channelDescription = args[1] as String
+            val channelId = args[2] as String
+            val newChannel = Channel(channelName, channelDescription, channelId)
+            //now add to the channel Array
+            MessageService.channels.add(newChannel)
+            //print below to see if it is working
+            println(newChannel.name)
+            println(newChannel.description)
+            println(newChannel.id)
+        }
     }
 
     fun sendMsgBtnClicked (view: View){
