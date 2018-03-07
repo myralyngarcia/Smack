@@ -1,6 +1,7 @@
 package com.example.myralyn.smack.Services
 
 import android.graphics.Color
+import com.example.myralyn.smack.Controller.App
 import com.example.myralyn.smack.R.id.basic
 import com.example.myralyn.smack.R.id.loginBtnNavHeader
 import java.util.*
@@ -21,9 +22,9 @@ object UserDataService {
         avatarColor =""
         email = ""
         name = ""
-        AuthService.authToken=""
-        AuthService.userEmail=""
-        AuthService.isLoggedIn=false
+        App.prefs.authToken=""
+        App.prefs.userEmail=""
+        App.prefs.isLoggedIn=false
     }
 
     //the component is the RGB and we return Int coz in android colors are actually integers

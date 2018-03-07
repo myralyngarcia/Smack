@@ -50,6 +50,12 @@ class MainActivity : AppCompatActivity(){
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
         setupAdapters()
+        //when we start the app we need to check if user is logged-in
+        //if so we finduseremail and no need to login
+        if (App.prefs.isLoggedIn){
+            AuthService.findUserByEmail(this){}
+        }
+
     }
 
     override fun onResume() {
@@ -68,7 +74,7 @@ class MainActivity : AppCompatActivity(){
     private val userDataChangeReceiver = object: BroadcastReceiver(){
         override fun onReceive(context: Context, intent: Intent?) {
             //update navHeader ui
-            if (AuthService.isLoggedIn){
+            if (App.prefs.isLoggedIn){
                 usernameNavHeader.text = UserDataService.name
                 userEmailNavHeader.text = UserDataService.email
                 val resourceId = resources.getIdentifier(UserDataService.avatarName, "drawable",
@@ -95,7 +101,7 @@ class MainActivity : AppCompatActivity(){
         }
     }
     fun loginBtnNavClicked(view: View){
-        if(AuthService.isLoggedIn){
+        if(App.prefs.isLoggedIn){
             //we want to logout and clear out the UserData variable and AuthService
             UserDataService.logout()
             usernameNavHeader.text = ""
@@ -112,7 +118,7 @@ class MainActivity : AppCompatActivity(){
     }
     fun addChannelClicked (view: View){
         //do a check: allow user to create channel only if they are logged-in
-        if(AuthService.isLoggedIn){
+        if(App.prefs.isLoggedIn){
             //builder for alert dialog
             val builder = AlertDialog.Builder(this)
             //create dialog view from custom layout
