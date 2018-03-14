@@ -24,11 +24,13 @@ import io.socket.emitter.Emitter
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.add_channel_dialog.view.*
 import kotlinx.android.synthetic.main.app_bar_main.*
+import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.nav_header_main.*
 
 class MainActivity : AppCompatActivity(){
     val socket = IO.socket(SOCKET_URL)
     lateinit var channelAdapter: ArrayAdapter<Channel>
+    var selectedChannel: Channel? = null
 
     private fun setupAdapters(){
         channelAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, MessageService.channels)
@@ -50,6 +52,16 @@ class MainActivity : AppCompatActivity(){
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
         setupAdapters()
+
+        channel_list.setOnItemClickListener { _, _, _, i ->
+            //so we are going to change the name of the selectedChannel to the one we selected which is id
+            selectedChannel = MessageService.channels[i.toInt()]
+            //then we close the Nav drawer, START to start closing
+            drawer_layout.closeDrawer(GravityCompat.START)
+            //and we are just going to update with channel to the newly selected channel
+            updateWithChannel()
+        }
+
         //when we start the app we need to check if user is logged-in
         //if so we finduseremail and no need to login
         if (App.prefs.isLoggedIn){
@@ -83,14 +95,24 @@ class MainActivity : AppCompatActivity(){
                 userimageNavHeader.setBackgroundColor(UserDataService.returnAvatarColor(UserDataService.avatarColor))
                 loginBtnNavHeader.text ="Logout"
 
-                MessageService.getChannels(context){ complete ->
+                MessageService.getChannels(){ complete ->
                     if (complete){
-                        channelAdapter.notifyDataSetChanged()
+                        if (MessageService.channels.count()>0){
+                            selectedChannel = MessageService.channels[0]
+                            //then set dataHas changed, if there are no channel at all we don’t need to notifyData has changed
+                            channelAdapter.notifyDataSetChanged()
+                            updateWithChannel()
+                        }
                     }
 
                 }
             }
         }
+    }
+
+    fun updateWithChannel(){
+        mainChannelName.text = "#${selectedChannel?.name}"
+        //this is where we are going to download the messages
     }
 
     override fun onBackPressed() {
@@ -124,7 +146,7 @@ class MainActivity : AppCompatActivity(){
             //create dialog view from custom layout
             val dialogView = layoutInflater.inflate(R.layout.add_channel_dialog, null)
             builder.setView(dialogView)
-                    .setPositiveButton("Add"){dialogInterface, i ->
+                    .setPositiveButton("Add"){_, _ ->
                         //perform some logic when clicked.
                         // Get reference to the UI elements in Dialog views
                         val nameTextField = dialogView.findViewById<EditText>(R.id.addChannelNameTxt)
@@ -138,7 +160,7 @@ class MainActivity : AppCompatActivity(){
                         socket.emit("newChannel", channelName, channelDesc)
 
                     }
-                    .setNegativeButton ("Cancel"){dialogInterface, i ->
+                    .setNegativeButton ("Cancel"){_, _ ->
                         //cancel and close the dialog
                     }.show()
         }

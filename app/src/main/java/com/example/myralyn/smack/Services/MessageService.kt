@@ -19,7 +19,7 @@ object MessageService {
     //this object is going to download the channel messages, etc
     val channels = ArrayList<Channel>()  //initialize as empty arrayList of type Channel
 
-    fun getChannels (context: Context, complete: (Boolean)->Unit){
+    fun getChannels (complete: (Boolean)->Unit){
         val channelRequest = object: JsonArrayRequest (Method.GET, URL_GET_CHANNELS, null, Response.Listener { reponse ->
             try{
                 for (x in 0 until reponse.length()){
