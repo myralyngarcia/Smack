@@ -9,6 +9,7 @@ import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.Volley
 import com.example.myralyn.smack.Controller.App
 import com.example.myralyn.smack.Model.Channel
+import com.example.myralyn.smack.Model.Message
 import com.example.myralyn.smack.Utilities.URL_GET_CHANNELS
 import org.json.JSONException
 
@@ -18,6 +19,7 @@ import org.json.JSONException
 object MessageService {
     //this object is going to download the channel messages, etc
     val channels = ArrayList<Channel>()  //initialize as empty arrayList of type Channel
+    val messages = ArrayList<Message>()
 
     fun getChannels (complete: (Boolean)->Unit){
         val channelRequest = object: JsonArrayRequest (Method.GET, URL_GET_CHANNELS, null, Response.Listener { reponse ->

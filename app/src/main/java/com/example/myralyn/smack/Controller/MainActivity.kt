@@ -13,6 +13,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import com.example.myralyn.smack.Model.Channel
+import com.example.myralyn.smack.Model.Message
 import com.example.myralyn.smack.R
 import com.example.myralyn.smack.Services.AuthService
 import com.example.myralyn.smack.Services.MessageService
@@ -46,6 +47,7 @@ class MainActivity : AppCompatActivity(){
         //we only want to be called once so we put it here in onCreate
         socket.connect()
         socket.on("channelCreated", onNewChannel)//we listen of event, ChannelCreated and use onNewChannel to extract the info
+        socket.on("messageCreated", onNewMessage)
 
         val toggle = ActionBarDrawerToggle(
                 this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
@@ -186,8 +188,44 @@ class MainActivity : AppCompatActivity(){
         }
     }
 
+    //we receive the args that we are able to access
+    private val onNewMessage = Emitter.Listener { args ->
+        //we are going to runOnUiThread bec. the callback of this is on diff background or worker thread
+        //and so we need to get back on the ui thread so we can make changes to the ui
+        runOnUiThread {
+            //we are going to extract from args the values that we need
+            val msgBody = args[0] as String
+            val channelId = args[2] as String //notice we skip 1 coz we are not using userId
+            val userName = args[3] as String
+            val userAvatar = args[4] as String
+            val userAvatarColor = args[5] as String
+            val id = args[6] as String
+            val timeStamp = args[7] as String
+
+            //now that we have all these values let go create a message object
+            val newMessage = Message(msgBody, channelId, userName, userAvatar,
+                    userAvatarColor, id, timeStamp)
+            MessageService.messages.add(newMessage)
+            //note we are going to keep in memory only the messages for the channel we selecetd
+            //to test this we print
+            println(newMessage.message)
+        }
+
+    }
+
     fun sendMsgBtnClicked (view: View){
-        hideKeyboard()
+        //make sure user isLoggedIn and messageTextField is not empty and there is selectedChannel
+        if (App.prefs.isLoggedIn && messageTxtField.text.isNotEmpty() && selectedChannel != null){
+            //create some variable for the userId and channelId
+            var userId = UserDataService.id
+            var channelId = selectedChannel!!.id //safe call is one ! but we already did check is not null hence we use !!
+            socket.emit("newMessage", messageTxtField.text.toString(), userId, channelId,
+                    UserDataService.name, UserDataService.avatarName, UserDataService.avatarColor)
+            messageTxtField.text.clear() //clear the text field once message is emitted
+            //then we hide the keyboard
+            hideKeyboard()
+        }
+
     }
 
     fun hideKeyboard (){
