@@ -25,6 +25,8 @@ object UserDataService {
         App.prefs.authToken=""
         App.prefs.userEmail=""
         App.prefs.isLoggedIn=false
+        MessageService.clearMessages()
+        MessageService.clearChannels()
     }
 
     //the component is the RGB and we return Int coz in android colors are actually integers
