@@ -8,10 +8,12 @@ import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import android.widget.EditText
+import com.example.myralyn.smack.Adapter.MessageAdapter
 import com.example.myralyn.smack.Model.Channel
 import com.example.myralyn.smack.Model.Message
 import com.example.myralyn.smack.R
@@ -31,11 +33,19 @@ import kotlinx.android.synthetic.main.nav_header_main.*
 class MainActivity : AppCompatActivity(){
     val socket = IO.socket(SOCKET_URL)
     lateinit var channelAdapter: ArrayAdapter<Channel>
+    lateinit var messageAdapter: MessageAdapter
     var selectedChannel: Channel? = null
 
     private fun setupAdapters(){
         channelAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, MessageService.channels)
         channel_list.adapter = channelAdapter
+        messageAdapter = MessageAdapter(this, MessageService.messages)
+        messageListView.adapter = messageAdapter
+
+        //dont forget your layout manager bec with recycler view you need to have the layour manager
+        val layoutManager = LinearLayoutManager(this)
+        messageListView.layoutManager = layoutManager
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -121,9 +131,10 @@ class MainActivity : AppCompatActivity(){
             MessageService.getMessages(selectedChannel!!.id){complete ->
                 //if there are message of complete
                 if (complete){
-                    //we are going to print our messages for now
-                    for (message in MessageService.messages){
-                        println(message.message)
+                    messageAdapter.notifyDataSetChanged()
+                    //now we want to scroll to the end of the message, not on top
+                    if (messageAdapter.itemCount > 0){
+                        messageListView.smoothScrollToPosition(messageAdapter.itemCount-1)
                     }
                 }
             }
@@ -142,6 +153,8 @@ class MainActivity : AppCompatActivity(){
         if(App.prefs.isLoggedIn){
             //we want to logout and clear out the UserData variable and AuthService
             UserDataService.logout()
+            channelAdapter.notifyDataSetChanged()
+            messageAdapter.notifyDataSetChanged()
             usernameNavHeader.text = ""
             userEmailNavHeader.text = ""
             userimageNavHeader.setImageResource(R.drawable.profiledefault)
@@ -226,8 +239,11 @@ class MainActivity : AppCompatActivity(){
                     val newMessage = Message(msgBody, channelId, userName, userAvatar,
                             userAvatarColor, id, timeStamp)
                     MessageService.messages.add(newMessage)
-                    //note we are going to keep in memory only the messages for the channel we selecetd
-                    //to test this we print
+                    //when we receive a new message as well we need to update the messages view
+                    messageAdapter.notifyDataSetChanged()
+                    //we also want to go to the last message
+                    messageListView.smoothScrollToPosition(messageAdapter.itemCount - 1)
+
                 }
             }
         }
