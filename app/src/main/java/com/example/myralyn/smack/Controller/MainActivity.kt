@@ -64,6 +64,9 @@ class MainActivity : AppCompatActivity(){
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
         setupAdapters()
+        //registerReceiver needs a receiver and IntentFilter so that it will not receive all intent
+        LocalBroadcastManager.getInstance(this).registerReceiver(userDataChangeReceiver,
+                IntentFilter(BROADCAST_USER_DATA_CHANGED))
 
         channel_list.setOnItemClickListener { _, _, _, i ->
             //so we are going to change the name of the selectedChannel to the one we selected which is id
@@ -73,21 +76,19 @@ class MainActivity : AppCompatActivity(){
             //and we are just going to update with channel to the newly selected channel
             updateWithChannel()
         }
-
         //when we start the app we need to check if user is logged-in
         //if so we finduseremail and no need to login
         if (App.prefs.isLoggedIn){
             AuthService.findUserByEmail(this){}
         }
-
     }
 
-    override fun onResume() {
-        //registerReceiver needs a receiver and IntentFilter so that it will not receive all intent
-        LocalBroadcastManager.getInstance(this).registerReceiver(userDataChangeReceiver,
-                IntentFilter(BROADCAST_USER_DATA_CHANGED))
-        super.onResume()
-    }
+//    override fun onResume() {
+//        //registerReceiver needs a receiver and IntentFilter so that it will not receive all intent
+//        LocalBroadcastManager.getInstance(this).registerReceiver(userDataChangeReceiver,
+//                IntentFilter(BROADCAST_USER_DATA_CHANGED))
+//        super.onResume()
+//    }
 
     override fun onDestroy() {
         socket.disconnect()
@@ -160,6 +161,7 @@ class MainActivity : AppCompatActivity(){
             userimageNavHeader.setImageResource(R.drawable.profiledefault)
             userimageNavHeader.setBackgroundColor(Color.TRANSPARENT)
             loginBtnNavHeader.text = "Login"
+            mainChannelName.text ="Please login"
 
         }else{
             //we want to login coz here we are logged-in
